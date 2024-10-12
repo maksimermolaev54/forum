@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форум Максима</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <h1>Форум Максима - Фоллак СССР</h1>
+
+    <!-- Форма для создания новой темы -->
+    <h2>Создать новую тему</h2>
+    <form id="new-topic-form">
+        <label for="name">Ваше имя:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="country">Выберите страну:</label>
+        <select id="country" name="country" required>
+            <option value="Россия">Россия</option>
+            <option value="Украина">Украина</option>
+            <option value="Беларусь">Беларусь</option>
+        </select><br><br>
+
+        <label for="text">Текст темы:</label>
+        <textarea id="text" name="text" required></textarea><br><br>
+
+        <label for="magnet_link">Магнит-ссылка:</label>
+        <input type="url" id="magnet_link" name="magnet_link" required><br><br>
+
+        <label for="comments">Комментарии:</label>
+        <textarea id="comments" name="comments"></textarea><br><br>
+
+        <button type="submit">Создать тему</button>
+    </form>
+
+    <!-- Список тем -->
+    <h2>Темы форума</h2>
+    <div id="topics"></div>
+
+    <script>
+        // Конфигурация Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyC5AVrgG2NDmYc_guu5YzMJpNcgJFf22V4",
+            authDomain: "forum-c869d.firebaseapp.com",
+            databaseURL: "https://forum-c869d-default-rtdb.firebaseio.com/",
+            projectId: "forum-c869d",
+            storageBucket: "forum-c869d.appspot.com",
+            messagingSenderId: "558313296876",
+            appId: "1:558313296876:web:5edfd4d79c80416878a6c9",
+            measurementId: "G-PG45MD0DZZ"
+        };
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        var database = firebase.database();
+
+        // Обработка отправки формы
+        document.getElementById('new-topic-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var name = document.getElementById('name').value;
+            var country = document.getElementById('country').value;
+            var text = document.getElementById('text').value;
+            var magnet_link = document.getElementById('magnet_link').value;
+            var comments = document.getElementById('comments').value;
+
+            // Добавление темы в Firebase
+            database.ref('topics').push({
+                name: name,
+                country: country,
+                text: text,
+                magnet_link: magnet_link,
+                comments: comments
+            });
+
+            // Очистка формы
+            document.getElementById('new-topic-form').reset();
+        });
+
+        // Отображение списка тем
+        var topicsDiv = document.getElementById('topics');
+        database.ref('topics').on('value', function(snapshot) {
+            topicsDiv.innerHTML = '';
+            snapshot.forEach(function(childSnapshot) {
+                var topic = childSnapshot.val();
+                topicsDiv.innerHTML += `
+                    <div class="topic">
+                        <h3>${topic.name} (${topic.country})</h3>
+                        <p>${topic.text}</p>
+                        <p><a href="${topic.magnet_link}">Магнит-ссылка</a></p>
+                        <p>Комментарии: ${topic.comments}</p>
+                    </div>
+                    <hr>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
